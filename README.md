@@ -142,6 +142,8 @@ O servidor ASGI adapta a aplicação Bottle para HTTP e atende conexões WebSock
 
 Para uma implantação com HTTPS, configure `BMVC_COOKIE_SECURE=1` e utilize um proxy reverso com TLS.
 
+O modo de depuração fica desligado por padrão. Durante o desenvolvimento local com `route.py`, defina `BMVC_DEBUG=1` somente quando precisar do recarregamento e das mensagens detalhadas do Bottle.
+
 ## Testes
 
 Os testes de integração precisam de um banco PostgreSQL descartável cujo nome termine em `_test`:
