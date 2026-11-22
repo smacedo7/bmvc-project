@@ -115,6 +115,7 @@ class CrudPostgresTest(unittest.TestCase):
             self.assertEqual(self.request(route.app, 'GET', '/', cookie=cookie)[0], '303 See Other')
         finally:
             route.ctl = anterior
+            anterior.repositorio.fechar()
 
     @staticmethod
     def request(app, method, path, dados=None, cookie=None):
@@ -128,7 +129,12 @@ class CrudPostgresTest(unittest.TestCase):
         if cookie:
             ambiente['HTTP_COOKIE'] = cookie
         resultado = {}
-        corpo = b''.join(app(ambiente, lambda status, headers, exc_info=None: resultado.update(status=status, headers=headers)))
+        resposta = app(ambiente, lambda status, headers, exc_info=None: resultado.update(status=status, headers=headers))
+        try:
+            corpo = b''.join(resposta)
+        finally:
+            if hasattr(resposta, 'close'):
+                resposta.close()
         return resultado['status'], corpo.decode(), resultado['headers']
 
 
