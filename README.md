@@ -39,10 +39,13 @@ cd bmvc-project
 ### 2. Iniciar a aplicação
 
 ```bash
+cp .env.example .env
 docker compose up --build -d
 ```
 
-O Compose inicia a aplicação e o PostgreSQL. O serviço web aguarda o banco ficar saudável antes de iniciar.
+Revise o arquivo `.env` antes de iniciar, principalmente usuário e senha do PostgreSQL. Se alterar esses valores, atualize também `DATABASE_URL` com os mesmos dados. Senhas com caracteres especiais precisam estar codificadas no formato de URL.
+
+O Compose inicia a aplicação e o PostgreSQL. O serviço web aguarda o banco ficar saudável antes de aplicar as migrações e iniciar.
 
 ### 3. Criar o primeiro usuário
 
@@ -88,6 +91,8 @@ alembic upgrade head
 python -m app.manage create-user
 python realtime.py
 ```
+
+Se você personalizou as credenciais ou a porta no `.env`, ajuste a URL usada na execução local.
 
 No Windows PowerShell, ative o ambiente com `.venv\Scripts\Activate.ps1` e defina a conexão com:
 

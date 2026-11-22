@@ -4,10 +4,11 @@ services:
     init: true
     command: ["sh", "-c", "alembic upgrade head && exec python realtime.py"]
     environment:
-      DATABASE_URL: postgresql+psycopg://bmvc:bmvc_local@db:5432/bmvc
-      BMVC_HOST: 0.0.0.0
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://bmvc:bmvc_local@db:5432/bmvc}
+      BMVC_HOST: ${BMVC_HOST:-0.0.0.0}
+      BMVC_COOKIE_SECURE: ${BMVC_COOKIE_SECURE:-0}
     ports:
-      - "127.0.0.1:8080:8080"
+      - "${BMVC_BIND_ADDRESS:-127.0.0.1}:${BMVC_WEB_PORT:-8080}:8080"
     depends_on:
       db:
         condition: service_healthy
@@ -20,15 +21,15 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: bmvc
-      POSTGRES_USER: bmvc
-      POSTGRES_PASSWORD: bmvc_local
+      POSTGRES_DB: ${POSTGRES_DB:-bmvc}
+      POSTGRES_USER: ${POSTGRES_USER:-bmvc}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bmvc_local}
     ports:
-      - "127.0.0.1:5433:5432"
+      - "${BMVC_BIND_ADDRESS:-127.0.0.1}:${POSTGRES_PORT:-5433}:5432"
     volumes:
       - bmvc_postgres:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U bmvc -d bmvc"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 3s
       timeout: 3s
       retries: 10
