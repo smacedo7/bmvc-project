@@ -84,6 +84,7 @@ pip install -r requirements.txt
 
 export DATABASE_URL="postgresql+psycopg://bmvc:bmvc_local@127.0.0.1:5433/bmvc"
 
+alembic upgrade head
 python -m app.manage create-user
 python realtime.py
 ```
@@ -121,6 +122,7 @@ O código segue a divisão MVC usada pelo BMVC:
 | `app/static/` | CSS, JavaScript e imagens. |
 | `app/realtime.py` | Distribuição de eventos em tempo real. |
 | `realtime.py` | Entrada ASGI para HTTP e WebSocket. |
+| `migrations/` | Histórico de alterações do banco gerenciado pelo Alembic. |
 
 O servidor ASGI adapta a aplicação Bottle para HTTP e atende conexões WebSocket em `/ws`. Após uma alteração confirmada no banco, o painel recebe um evento e consulta `/api/resumo` para atualizar os indicadores.
 

@@ -2,6 +2,7 @@ services:
   web:
     build: .
     init: true
+    command: ["sh", "-c", "alembic upgrade head && exec python realtime.py"]
     environment:
       DATABASE_URL: postgresql+psycopg://bmvc:bmvc_local@db:5432/bmvc
       BMVC_HOST: 0.0.0.0

@@ -5,7 +5,7 @@ from sqlalchemy import create_engine, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
-from app.models.entities import Base, Cliente, Produto, RegraDeNegocio, Venda, inteiro
+from app.models.entities import Cliente, Produto, RegraDeNegocio, Venda, inteiro
 
 
 class Repositorio:
@@ -16,7 +16,6 @@ class Repositorio:
         if not url.startswith('postgresql+psycopg://'):
             raise RuntimeError('DATABASE_URL deve usar PostgreSQL com o driver psycopg.')
         self.engine = create_engine(url, pool_pre_ping=True)
-        Base.metadata.create_all(self.engine)
 
     def fechar(self):
         self.engine.dispose()
