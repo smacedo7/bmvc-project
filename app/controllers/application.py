@@ -1,7 +1,8 @@
 """Controlador BMVC: coordena casos de uso e prepara as visões."""
 
-from bottle import template
+from bottle import request, template
 
+from app.models.auth import AuthService
 from app.models.entities import Cliente, Produto, RegraDeNegocio, Venda, reais
 from app.models.repository import Repositorio
 
@@ -16,6 +17,7 @@ AREAS = {
 class Application:
     def __init__(self, repositorio=None):
         self.repositorio = repositorio or Repositorio()
+        self.auth = AuthService(self.repositorio.engine)
         self.pages = {'helper': self.helper, 'inicio': self.inicio}
 
     def render(self, page):
@@ -26,12 +28,14 @@ class Application:
         return template('app/views/html/helper')
 
     def inicio(self):
-        return template('app/views/html/inicio', resumo=self.repositorio.resumo(), reais=reais)
+        return template('app/views/html/inicio', resumo=self.repositorio.resumo(),
+                        reais=reais, csrf=self.csrf, usuario=self.usuario)
 
     def lista(self, area, erro=None):
         classe, titulo, singular = AREAS[area]
         return template('app/views/html/lista', area=area, titulo=titulo, singular=singular,
-                        registros=self.repositorio.listar(classe), erro=erro, reais=reais)
+                        registros=self.repositorio.listar(classe), erro=erro, reais=reais,
+                        csrf=self.csrf, usuario=self.usuario)
 
     def formulario(self, area, id=None, erro=None, valores=None):
         classe, titulo, singular = AREAS[area]
@@ -44,7 +48,7 @@ class Application:
                         singular=singular, obj=obj, valores=valores, erro=erro,
                         clientes=self.repositorio.listar(Cliente) if area == 'vendas' else [],
                         produtos=self.repositorio.listar(Produto) if area == 'vendas' else [],
-                        reais=reais)
+                        reais=reais, csrf=self.csrf, usuario=self.usuario)
 
     def detalhe(self, area, id):
         classe, titulo, singular = AREAS[area]
@@ -52,7 +56,16 @@ class Application:
         if obj is None:
             raise RegraDeNegocio('Registro não encontrado.')
         return template('app/views/html/detalhe', area=area, titulo=titulo,
-                        singular=singular, obj=obj, reais=reais)
+                        singular=singular, obj=obj, reais=reais,
+                        csrf=self.csrf, usuario=self.usuario)
+
+    @property
+    def csrf(self):
+        return request.environ.get('bmvc.csrf', '')
+
+    @property
+    def usuario(self):
+        return request.environ.get('bmvc.usuario')
 
     def salvar(self, area, dados, id=None):
         if area == 'clientes':

@@ -83,23 +83,41 @@ class CrudPostgresTest(unittest.TestCase):
         anterior = route.ctl
         route.ctl = Application(self.repo)
         try:
+            self.assertEqual(self.request(route.app, 'GET', '/login')[0], '200 OK')
+            self.assertEqual(self.request(route.app, 'GET', '/static/js/gestao.js')[0], '200 OK')
+            self.assertEqual(self.request(route.app, 'GET', '/')[0], '303 See Other')
+            route.ctl.auth.criar_usuario('teste', 'senha-forte-123')
+            self.assertIn('Usuário ou senha inválidos.', self.request(route.app, 'POST', '/login',
+                          {'usuario': 'teste', 'senha': 'errada'})[1])
+            _, _, headers = self.request(route.app, 'POST', '/login',
+                                          {'usuario': 'teste', 'senha': 'senha-forte-123'})
+            cookie = next(valor.split(';')[0] for chave, valor in headers
+                          if chave.lower() == 'set-cookie')
+            csrf = route.ctl.auth.identificar(cookie.split('=', 1)[1])[1]
+            self.assertEqual(self.request(route.app, 'GET', '/', cookie=cookie)[0], '200 OK')
+            self.assertEqual(self.request(route.app, 'GET', '/clientes', cookie=cookie)[0], '200 OK')
+            self.assertEqual(self.request(route.app, 'GET', '/clientes/novo', cookie=cookie)[0], '200 OK')
             self.assertEqual(self.request(route.app, 'POST', '/clientes/novo',
-                             {'nome': 'Bia', 'email': 'bia@example.com'})[0], '303 See Other')
+                             {'nome': 'Bia', 'email': 'bia@example.com'}, cookie)[0], '403 Forbidden')
+            self.assertEqual(self.request(route.app, 'POST', '/clientes/novo',
+                             {'nome': 'Bia', 'email': 'bia@example.com', '_csrf': csrf}, cookie)[0], '303 See Other')
             self.assertEqual(self.request(route.app, 'POST', '/produtos/novo',
-                             {'nome': 'Lápis', 'preco': '4.50', 'estoque': '8'})[0], '303 See Other')
+                             {'nome': 'Lápis', 'preco': '4.50', 'estoque': '8', '_csrf': csrf}, cookie)[0], '303 See Other')
             self.assertEqual(self.request(route.app, 'POST', '/vendas/novo',
-                             {'cliente_id': '1', 'produto_id': '1', 'quantidade': '2'})[0], '303 See Other')
-            status, body = self.request(route.app, 'GET', '/vendas/1')
+                             {'cliente_id': '1', 'produto_id': '1', 'quantidade': '2', '_csrf': csrf}, cookie)[0], '303 See Other')
+            status, body, _ = self.request(route.app, 'GET', '/vendas/1', cookie=cookie)
             self.assertEqual(status, '200 OK')
             self.assertIn('R$ 9,00', body)
-            self.assertEqual(self.request(route.app, 'POST', '/vendas/1/excluir')[0], '303 See Other')
-            self.assertEqual(self.request(route.app, 'POST', '/produtos/1/excluir')[0], '303 See Other')
-            self.assertEqual(self.request(route.app, 'POST', '/clientes/1/excluir')[0], '303 See Other')
+            self.assertEqual(self.request(route.app, 'POST', '/vendas/1/excluir', {'_csrf': csrf}, cookie)[0], '303 See Other')
+            self.assertEqual(self.request(route.app, 'POST', '/produtos/1/excluir', {'_csrf': csrf}, cookie)[0], '303 See Other')
+            self.assertEqual(self.request(route.app, 'POST', '/clientes/1/excluir', {'_csrf': csrf}, cookie)[0], '303 See Other')
+            self.assertEqual(self.request(route.app, 'POST', '/logout', {'_csrf': csrf}, cookie)[0], '303 See Other')
+            self.assertEqual(self.request(route.app, 'GET', '/', cookie=cookie)[0], '303 See Other')
         finally:
             route.ctl = anterior
 
     @staticmethod
-    def request(app, method, path, dados=None):
+    def request(app, method, path, dados=None, cookie=None):
         conteudo = urlencode(dados or {}).encode()
         ambiente = {'REQUEST_METHOD': method, 'PATH_INFO': path, 'SERVER_NAME': 'localhost',
                     'SERVER_PORT': '80', 'SERVER_PROTOCOL': 'HTTP/1.1', 'wsgi.url_scheme': 'http',
@@ -107,9 +125,11 @@ class CrudPostgresTest(unittest.TestCase):
                     'CONTENT_LENGTH': str(len(conteudo)), 'wsgi.input': io.BytesIO(conteudo),
                     'wsgi.errors': io.StringIO(), 'wsgi.version': (1, 0),
                     'wsgi.multithread': False, 'wsgi.multiprocess': False, 'wsgi.run_once': False}
+        if cookie:
+            ambiente['HTTP_COOKIE'] = cookie
         resultado = {}
-        corpo = b''.join(app(ambiente, lambda status, headers, exc_info=None: resultado.update(status=status)))
-        return resultado['status'], corpo.decode()
+        corpo = b''.join(app(ambiente, lambda status, headers, exc_info=None: resultado.update(status=status, headers=headers)))
+        return resultado['status'], corpo.decode(), resultado['headers']
 
 
 if __name__ == '__main__':

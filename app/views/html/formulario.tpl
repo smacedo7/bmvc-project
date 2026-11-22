@@ -5,6 +5,7 @@
 <p class="erro" role="alert">{{erro}}</p>
 % end
 <form method="post" action="{{('/' + area + '/' + str(obj.id) + '/editar') if obj else ('/' + area + '/novo')}}">
+<input type="hidden" name="_csrf" value="{{csrf}}">
 % if area == 'clientes':
 <label>Nome<input name="nome" required maxlength="120" value="{{valores.get('nome', '')}}"></label>
 <label>E-mail<input name="email" type="email" required maxlength="160" value="{{valores.get('email', '')}}"></label>

@@ -114,3 +114,24 @@ class Venda(Base):
         self.produto_id = produto.id
         self.quantidade = inteiro(quantidade, 'Quantidade', 1)
         self.preco_unitario_centavos = produto.preco_centavos
+
+
+class Usuario(Base):
+    __tablename__ = 'usuarios'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    nome: Mapped[str] = mapped_column(String(80), nullable=False, unique=True)
+    senha_salt: Mapped[str] = mapped_column(String(64), nullable=False)
+    senha_hash: Mapped[str] = mapped_column(String(128), nullable=False)
+    sessoes: Mapped[list['Sessao']] = relationship(back_populates='usuario', cascade='all, delete-orphan')
+
+
+class Sessao(Base):
+    __tablename__ = 'sessoes'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    usuario_id: Mapped[int] = mapped_column(ForeignKey('usuarios.id'), nullable=False)
+    token_hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
+    csrf_token: Mapped[str] = mapped_column(String(64), nullable=False)
+    expira_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    usuario: Mapped[Usuario] = relationship(back_populates='sessoes')

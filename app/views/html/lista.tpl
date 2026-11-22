@@ -25,7 +25,7 @@
   % else:
     <td>{{item.cliente.nome}}</td><td>{{item.produto.nome}}</td><td>{{item.quantidade}}</td><td>{{reais(item.total_centavos)}}</td>
   % end
-    <td class="acoes"><a href="/{{area}}/{{item.id}}">Ver</a><a href="/{{area}}/{{item.id}}/editar">Editar</a><form method="post" action="/{{area}}/{{item.id}}/excluir" data-confirmar="Excluir este registro?"><button type="submit" class="botao-texto perigo">Excluir</button></form></td></tr>
+    <td class="acoes"><a href="/{{area}}/{{item.id}}">Ver</a><a href="/{{area}}/{{item.id}}/editar">Editar</a><form method="post" action="/{{area}}/{{item.id}}/excluir" data-confirmar="Excluir este registro?"><input type="hidden" name="_csrf" value="{{csrf}}"><button type="submit" class="botao-texto perigo">Excluir</button></form></td></tr>
   % end
   </tbody></table></div>
   % else:
