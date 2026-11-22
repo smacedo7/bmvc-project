@@ -5,4 +5,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 ENV BMVC_HOST=0.0.0.0
 EXPOSE 8080
-CMD ["python3", "route.py"]
+CMD ["python3", "realtime.py"]

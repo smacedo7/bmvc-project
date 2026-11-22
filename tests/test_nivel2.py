@@ -95,6 +95,7 @@ class CrudPostgresTest(unittest.TestCase):
                           if chave.lower() == 'set-cookie')
             csrf = route.ctl.auth.identificar(cookie.split('=', 1)[1])[1]
             self.assertEqual(self.request(route.app, 'GET', '/', cookie=cookie)[0], '200 OK')
+            self.assertEqual(self.request(route.app, 'GET', '/api/resumo', cookie=cookie)[0], '200 OK')
             self.assertEqual(self.request(route.app, 'GET', '/clientes', cookie=cookie)[0], '200 OK')
             self.assertEqual(self.request(route.app, 'GET', '/clientes/novo', cookie=cookie)[0], '200 OK')
             self.assertEqual(self.request(route.app, 'POST', '/clientes/novo',

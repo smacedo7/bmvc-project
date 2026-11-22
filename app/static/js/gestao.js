@@ -41,3 +41,54 @@ document.querySelectorAll('[data-confirmar]').forEach((formulario) => {
     if (!window.confirm(formulario.dataset.confirmar)) evento.preventDefault();
   });
 });
+
+// O resumo recebe avisos por WebSocket e busca os números atualizados por HTTP.
+const statusTempoReal = document.querySelector('[data-tempo-real]');
+if (statusTempoReal) {
+  let tentativas = 0;
+  let ativo = true;
+  const formatarReais = (centavos) => new Intl.NumberFormat('pt-BR', {
+    style: 'currency', currency: 'BRL',
+  }).format(centavos / 100);
+
+  async function sincronizarResumo() {
+    try {
+      const resposta = await fetch('/api/resumo', { credentials: 'same-origin', cache: 'no-store' });
+      if (resposta.redirected || !resposta.ok) {
+        ativo = false;
+        statusTempoReal.textContent = 'Sessão encerrada. Entre novamente.';
+        return;
+      }
+      const dados = await resposta.json();
+      document.querySelectorAll('[data-resumo]').forEach((campo) => {
+        const chave = campo.dataset.resumo;
+        campo.textContent = chave === 'faturamento_centavos'
+          ? formatarReais(dados[chave]) : String(dados[chave]);
+      });
+    } catch (erro) {
+      statusTempoReal.textContent = 'Não foi possível sincronizar os indicadores.';
+    }
+  }
+
+  function conectar() {
+    if (!ativo) return;
+    const protocolo = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const socket = new WebSocket(`${protocolo}//${window.location.host}/ws`);
+    socket.addEventListener('open', () => {
+      tentativas = 0;
+      statusTempoReal.textContent = 'Tempo real conectado';
+      sincronizarResumo();
+    });
+    socket.addEventListener('message', (evento) => {
+      if (evento.data === 'dados-atualizados') sincronizarResumo();
+    });
+    socket.addEventListener('close', () => {
+      if (!ativo) return;
+      statusTempoReal.textContent = 'Tempo real desconectado. Reconectando…';
+      tentativas += 1;
+      window.setTimeout(conectar, Math.min(1000 * 2 ** tentativas, 15000));
+    });
+    socket.addEventListener('error', () => socket.close());
+  }
+  conectar();
+}

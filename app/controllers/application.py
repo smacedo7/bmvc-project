@@ -5,6 +5,7 @@ from bottle import request, template
 from app.models.auth import AuthService
 from app.models.entities import Cliente, Produto, RegraDeNegocio, Venda, reais
 from app.models.repository import Repositorio
+from app.realtime import hub
 
 
 AREAS = {
@@ -74,9 +75,11 @@ class Application:
             self.repositorio.salvar_produto(dados, id)
         else:
             self.repositorio.salvar_venda(dados, id)
+        hub.publicar()
 
     def excluir(self, area, id):
         self.repositorio.excluir(AREAS[area][0], id)
+        hub.publicar()
 
     @staticmethod
     def _valores(obj, area):

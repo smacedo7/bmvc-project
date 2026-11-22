@@ -2,6 +2,7 @@
 
 import os
 import hmac
+import json
 from bottle import Bottle, abort, redirect, request, response, run, static_file, template
 
 from app.controllers.application import Application, AREAS
@@ -72,6 +73,13 @@ def helper():
 @app.get('/')
 def inicio():
     return ctl.render('inicio')
+
+
+@app.get('/api/resumo')
+def resumo_api():
+    response.content_type = 'application/json; charset=UTF-8'
+    response.set_header('Cache-Control', 'no-store')
+    return json.dumps(ctl.repositorio.resumo())
 
 
 @app.get('/<area>')
