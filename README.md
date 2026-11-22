@@ -1,92 +1,164 @@
-# BMVC Gestão — ERP/CRM acadêmico
+# BMVC Gestão
 
-Sistema interno simples para cadastrar clientes e produtos, registrar vendas e acompanhar um resumo administrativo. O projeto foi construído em Python sobre a estrutura [BMVC fornecida pelo professor](https://github.com/hgmachine/bmvc_start_from_this). O planejamento está em `.specify/` e `specs/`, seguindo o [Spec Kit](https://github.com/github/spec-kit).
+Aplicação web para gestão de clientes, produtos e vendas, com painel administrativo, controle de estoque, autenticação e atualização de indicadores em tempo real.
 
-Repositório do trabalho: [smacedo7/bmvc-project](https://github.com/smacedo7/bmvc-project).
+O projeto utiliza Python com Bottle na camada HTTP, SQLAlchemy para persistência, PostgreSQL como banco de dados e WebSocket para sincronização do painel. O ambiente completo pode ser iniciado com Docker Compose.
 
-## Entregas por nível
+## Funcionalidades
 
-| Nível | O que demonstrar | Branch congelada | Roteiro | Vídeo máximo |
-| --- | --- | --- | --- | --- |
-| BMVC I | Página estática própria com CSS e JS externos ativos | `video/nivel-1` | [Nível 1](docs/videos/nivel-1.md) | 3 min |
-| BMVC II | Objetos Python e CRUD completo | `video/nivel-2` | [Nível 2](docs/videos/nivel-2.md) | 6 min |
-| BMVC III | CRUD, login e área restrita | `video/nivel-3` | [Nível 3](docs/videos/nivel-3.md) | 10 min |
-| BMVC IV | CRUD, login e atualização em tempo real por WebSocket | `video/nivel-4` | [Nível 4](docs/videos/nivel-4.md) | 15 min |
+- Cadastro, consulta, edição e exclusão de clientes.
+- Cadastro de produtos com preço e controle de estoque.
+- Registro de vendas vinculadas a clientes e produtos.
+- Atualização automática do estoque ao criar, editar ou excluir uma venda.
+- Painel com totais de clientes, produtos, vendas e valor vendido.
+- Autenticação com sessões persistidas e proteção CSRF.
+- Atualização do painel em tempo real por WebSocket.
+- Filtro de registros e interface responsiva.
 
-Os vídeos precisam ser gravados e publicados pelo estudante. Os roteiros em `docs/videos/` orientam a demonstração; este repositório não contém links de vídeos publicados.
+## Tecnologias
 
-## Branches e histórico
+| Área | Tecnologia |
+| --- | --- |
+| Backend | Python 3.12 e Bottle |
+| ORM | SQLAlchemy 2 |
+| Banco de dados | PostgreSQL 16 |
+| Servidor | Uvicorn e ASGI |
+| Tempo real | WebSocket |
+| Frontend | HTML/TPL, CSS e JavaScript |
+| Ambiente | Docker e Docker Compose |
 
-`main` é a versão completa e estável; `dev` é a integração. As branches `nivel/1-estatico`, `nivel/2-crud`, `nivel/3-login` e `nivel/4-websocket` registram a evolução. Cada `video/nivel-*` aponta para o commit exato planejado para a gravação correspondente. Para reproduzir uma etapa, execute `git switch video/nivel-1` (troque o número conforme o vídeo). Não grave um nível usando a branch de outro.
+## Início rápido com Docker
 
-## Requisitos
+### 1. Clonar o repositório
 
-- Python 3.11 ou superior.
-- PostgreSQL 16 ou superior. `compose.yaml` oferece uma instância local na porta **5433**. Também é possível usar um PostgreSQL já instalado.
-- Bottle, SQLAlchemy, psycopg, Uvicorn e asgiref: instale com `requirements.txt`.
-- Porta 8080 disponível para a aplicação.
+```bash
+git clone https://github.com/smacedo7/bmvc-project.git
+cd bmvc-project
+```
 
-## Executar BMVC IV (branch `main` ou `video/nivel-4`)
+### 2. Iniciar a aplicação
 
-Na raiz do repositório:
+```bash
+docker compose up --build -d
+```
+
+O Compose inicia a aplicação e o PostgreSQL. O serviço web aguarda o banco ficar saudável antes de iniciar.
+
+### 3. Criar o primeiro usuário
+
+```bash
+docker compose run --rm web python -m app.manage create-user
+```
+
+Informe o nome do usuário e uma senha com pelo menos oito caracteres.
+
+### 4. Acessar
+
+Abra [http://127.0.0.1:8080/login](http://127.0.0.1:8080/login) e entre com o usuário criado.
+
+Para acompanhar os serviços:
+
+```bash
+docker compose ps
+docker compose logs -f web
+```
+
+Para encerrar:
+
+```bash
+docker compose down
+```
+
+O banco fica armazenado em um volume Docker. Para remover também os dados locais, use `docker compose down -v`.
+
+## Execução local
+
+É possível executar o Python localmente e manter apenas o PostgreSQL no Docker:
 
 ```bash
 docker compose up -d db
+
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+
 export DATABASE_URL="postgresql+psycopg://bmvc:bmvc_local@127.0.0.1:5433/bmvc"
+
 python -m app.manage create-user
 python realtime.py
 ```
 
-O comando `create-user` é necessário apenas para o primeiro usuário; ele pede nome e senha sem mostrar a senha digitada. Abra [http://127.0.0.1:8080/login](http://127.0.0.1:8080/login). Entre e navegue por Resumo, Clientes, Produtos e Vendas. Para demonstrar tempo real, abra o Resumo em uma aba e, em outra aba autenticada, cadastre ou altere uma venda. Os indicadores da primeira aba mudam sem F5.
+No Windows PowerShell, ative o ambiente com `.venv\Scripts\Activate.ps1` e defina a conexão com:
 
-Para os **níveis 1 a 3**, use `python route.py` no lugar de `python realtime.py`. O nível 1 requer somente Bottle e dispensa PostgreSQL. Os níveis 2 e 3 requerem `DATABASE_URL`; o nível 3 também exige `create-user`. As tabelas são criadas na primeira execução. Se usar PostgreSQL próprio, adapte a URL de `.env.example`. As credenciais em `compose.yaml` servem apenas para desenvolvimento local. Não publique `.env` nem use a configuração de desenvolvimento como implantação pública.
+```powershell
+$env:DATABASE_URL="postgresql+psycopg://bmvc:bmvc_local@127.0.0.1:5433/bmvc"
+```
 
-## Funcionalidades e regras
+## Como usar
 
-- **Clientes:** criar, listar, consultar, editar e excluir. E-mail válido e único.
-- **Produtos:** criar, listar, consultar, editar e excluir. Preço positivo, em centavos; estoque não negativo.
-- **Vendas:** um cliente, um produto e uma quantidade por venda. Criar reduz o estoque; editar ajusta a quantidade; excluir devolve as unidades. A venda guarda o preço unitário vigente no momento do registro e calcula o total.
-- **Integridade:** operação com estoque insuficiente falha sem modificar venda ou estoque. Clientes e produtos com vendas não podem ser excluídos.
-- **Resumo:** contagens e valor histórico vendido. No nível 4, WebSocket avisa a página sobre alterações e `fetch('/api/resumo')` sincroniza os valores sem recarregar.
-- **Acesso:** resumo e CRUD exigem login nos níveis 3 e 4. A senha usa PBKDF2 com salt; sessões têm token aleatório em cookie HttpOnly e SameSite=Lax, expiram em oito horas e são invalidadas ao sair. Formulários de alteração exigem CSRF.
+1. Cadastre um cliente com nome e e-mail.
+2. Cadastre um produto com preço e estoque disponível.
+3. Registre uma venda selecionando cliente, produto e quantidade.
+4. Acompanhe os indicadores no resumo administrativo.
+5. Abra o resumo em outra aba para observar as atualizações em tempo real.
 
-## Como o BMVC foi usado
+Uma venda guarda o preço vigente no momento do registro. Ao criar uma venda, a quantidade é retirada do estoque; ao editar, a diferença é ajustada; ao excluir, as unidades são devolvidas. Operações com estoque insuficiente são recusadas sem alterar os dados.
 
-| Arquivo | Responsabilidade |
+Clientes e produtos vinculados a vendas não podem ser excluídos enquanto houver dependências.
+
+## Arquitetura
+
+O código segue a divisão MVC usada pelo BMVC:
+
+| Caminho | Responsabilidade |
 | --- | --- |
-| `route.py` | Rotas Bottle e adaptação de requisições HTTP. |
-| `app/controllers/application.py` | Coordena casos de uso e prepara os templates. |
-| `app/models/entities.py` | Classes de domínio `Cliente`, `Produto`, `Venda`, `Usuario` e `Sessao`, com validações e comportamento. |
-| `app/models/repository.py` | Consultas e transações SQLAlchemy/PostgreSQL. |
-| `app/models/auth.py` | Autenticação e ciclo de vida da sessão. |
-| `app/views/html/` | Páginas TPL. A página `helper.tpl` original foi preservada em `/helper`. |
-| `app/static/css/` e `app/static/js/` | Estilo e interação carregados pelas páginas. |
-| `app/realtime.py` e `realtime.py` | Hub WebSocket e servidor ASGI do nível 4. O HTTP continua sendo atendido pelo Bottle. |
+| `route.py` | Rotas HTTP, validação da sessão e adaptação das requisições. |
+| `app/controllers/application.py` | Coordenação dos casos de uso e preparação das páginas. |
+| `app/models/entities.py` | Entidades e regras de domínio. |
+| `app/models/repository.py` | Consultas e transações com SQLAlchemy. |
+| `app/models/auth.py` | Autenticação, criação e encerramento de sessões. |
+| `app/views/html/` | Templates da interface. |
+| `app/static/` | CSS, JavaScript e imagens. |
+| `app/realtime.py` | Distribuição de eventos em tempo real. |
+| `realtime.py` | Entrada ASGI para HTTP e WebSocket. |
 
-O WebSocket atende `/ws`, valida cookie e origem e emite apenas um aviso de alteração. Os dados do resumo vêm de `/api/resumo`, que também exige login. O hub fica em memória e foi feito para **uma instância local**; vários processos exigiriam um canal compartilhado, como Redis.
+O servidor ASGI adapta a aplicação Bottle para HTTP e atende conexões WebSocket em `/ws`. Após uma alteração confirmada no banco, o painel recebe um evento e consulta `/api/resumo` para atualizar os indicadores.
+
+## Segurança
+
+- Senhas armazenadas com PBKDF2, salt individual e sem texto puro.
+- Sessões com tokens aleatórios armazenados como hash.
+- Cookies `HttpOnly` e `SameSite=Lax`.
+- Validação CSRF em operações de escrita.
+- Validação de sessão e origem no WebSocket.
+- Serviços publicados apenas em `127.0.0.1` no ambiente local.
+
+Para uma implantação com HTTPS, configure `BMVC_COOKIE_SECURE=1` e utilize um proxy reverso com TLS.
 
 ## Testes
 
-Crie um banco de teste **descartável** cujo nome termine em `_test`. Com o PostgreSQL do Compose:
+Os testes de integração precisam de um banco PostgreSQL descartável cujo nome termine em `_test`:
 
 ```bash
 docker compose exec db createdb -U bmvc bmvc_test
+
 export DATABASE_URL="postgresql+psycopg://bmvc:bmvc_local@127.0.0.1:5433/bmvc_test"
 export TEST_DATABASE_URL="$DATABASE_URL"
+
 python -m unittest discover -s tests -v
 ```
 
-Os testes **apagam e recriam tabelas** nesse banco de teste. Nunca use o banco da aplicação para `TEST_DATABASE_URL`. A suíte cobre CRUD, validação, ajuste e reversão de estoque, login, CSRF, API e broadcast WebSocket. Para conferir o JavaScript, `node --check app/static/js/gestao.js` verifica a sintaxe. A demonstração visual e a gravação dos vídeos continuam sendo etapas manuais.
+Os testes recriam as tabelas do banco indicado por `TEST_DATABASE_URL`. Não utilize o banco principal da aplicação.
 
-## Limites conhecidos
+## Documentação
 
-- Uma venda contém um produto; impostos, notas fiscais, fornecedores e múltiplos usuários simultâneos não foram incluídos.
-- `Base.metadata.create_all()` cria tabelas ausentes, mas não migra tabelas já existentes. Mudanças futuras no esquema precisam de migrações.
-- O servidor padrão escuta em `127.0.0.1`; para HTTPS em outro ambiente, configure uma implantação própria e `BMVC_COOKIE_SECURE=1`.
+- [Manual completo de instalação e uso](docs/manual-de-uso.md)
+- [UML do nível 1](docs/uml/nivel-1.md)
+- [UML do nível 2](docs/uml/nivel-2.md)
+- [UML do nível 3](docs/uml/nivel-3.md)
+- [UML do nível 4](docs/uml/nivel-4.md)
+- [Especificações técnicas](specs/)
 
-## Spec Kit
+## Origem
 
-Cada nível tem `spec.md`, `plan.md` e `tasks.md` em `specs/`. A constituição fica em `.specify/memory/constitution.md`. A integração do Spec Kit neste repositório é a estrutura compartilhada (`none`), com templates e scripts oficiais; o trabalho de especificar, planejar, implementar e verificar foi aplicado em cada nível.
+O projeto foi desenvolvido a partir da estrutura [BMVC](https://github.com/hgmachine/bmvc_start_from_this), preservando sua organização de rotas, controladores, modelos, templates e arquivos estáticos.

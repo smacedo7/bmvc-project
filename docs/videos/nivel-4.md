@@ -1,8 +1,8 @@
 # Roteiro do vídeo 4 — BMVC IV (até 15 minutos)
 
 ## Preparação
-- Fazer checkout de `video/nivel-4`, subir PostgreSQL e configurar `DATABASE_URL`.
-- Criar usuário de demonstração se necessário; iniciar **`python realtime.py`**.
+- Para demonstrar o projeto com os dois contêineres, fazer checkout de `main` após a integração do PR Docker, executar `docker compose up --build -d` e conferir `docker compose ps`. A branch `video/nivel-4` preserva a versão anterior à configuração do serviço `web` no Compose.
+- Criar usuário de demonstração se necessário com `docker compose run --rm web python -m app.manage create-user`. Para execução sem Docker, seguir o README e iniciar **`python realtime.py`**.
 - Abrir duas abas autenticadas: A no resumo, B no cadastro de vendas. Deixar o status “Tempo real conectado” visível na aba A.
 
 ## Falas e demonstração
