@@ -39,10 +39,13 @@ cd bmvc-project
 ### 2. Iniciar a aplicação
 
 ```bash
+cp .env.example .env
 docker compose up --build -d
 ```
 
-O Compose inicia a aplicação e o PostgreSQL. O serviço web aguarda o banco ficar saudável antes de iniciar.
+Revise o arquivo `.env` antes de iniciar, principalmente usuário e senha do PostgreSQL. Se alterar esses valores, atualize também `DATABASE_URL` com os mesmos dados. Senhas com caracteres especiais precisam estar codificadas no formato de URL.
+
+O Compose inicia a aplicação e o PostgreSQL. O serviço web aguarda o banco ficar saudável antes de aplicar as migrações e iniciar.
 
 ### 3. Criar o primeiro usuário
 
@@ -84,9 +87,12 @@ pip install -r requirements.txt
 
 export DATABASE_URL="postgresql+psycopg://bmvc:bmvc_local@127.0.0.1:5433/bmvc"
 
+alembic upgrade head
 python -m app.manage create-user
 python realtime.py
 ```
+
+Se você personalizou as credenciais ou a porta no `.env`, ajuste a URL usada na execução local.
 
 No Windows PowerShell, ative o ambiente com `.venv\Scripts\Activate.ps1` e defina a conexão com:
 
@@ -121,6 +127,7 @@ O código segue a divisão MVC usada pelo BMVC:
 | `app/static/` | CSS, JavaScript e imagens. |
 | `app/realtime.py` | Distribuição de eventos em tempo real. |
 | `realtime.py` | Entrada ASGI para HTTP e WebSocket. |
+| `migrations/` | Histórico de alterações do banco gerenciado pelo Alembic. |
 
 O servidor ASGI adapta a aplicação Bottle para HTTP e atende conexões WebSocket em `/ws`. Após uma alteração confirmada no banco, o painel recebe um evento e consulta `/api/resumo` para atualizar os indicadores.
 
@@ -134,6 +141,8 @@ O servidor ASGI adapta a aplicação Bottle para HTTP e atende conexões WebSock
 - Serviços publicados apenas em `127.0.0.1` no ambiente local.
 
 Para uma implantação com HTTPS, configure `BMVC_COOKIE_SECURE=1` e utilize um proxy reverso com TLS.
+
+O modo de depuração fica desligado por padrão. Durante o desenvolvimento local com `route.py`, defina `BMVC_DEBUG=1` somente quando precisar do recarregamento e das mensagens detalhadas do Bottle.
 
 ## Testes
 
@@ -153,6 +162,7 @@ Os testes recriam as tabelas do banco indicado por `TEST_DATABASE_URL`. Não uti
 ## Documentação
 
 - [Manual completo de instalação e uso](docs/manual-de-uso.md)
+- [Guia de apresentação dos quatro níveis](docs/guia-apresentacao.md)
 - [UML do nível 1](docs/uml/nivel-1.md)
 - [UML do nível 2](docs/uml/nivel-2.md)
 - [UML do nível 3](docs/uml/nivel-3.md)

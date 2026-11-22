@@ -143,4 +143,5 @@ def excluir(area, id):
 
 
 if __name__ == '__main__':
-    run(app, host=os.environ.get('BMVC_HOST', '127.0.0.1'), port=8080, debug=True)
+    debug = os.getenv('BMVC_DEBUG', '0').strip().lower() in {'1', 'true', 'yes', 'on'}
+    run(app, host=os.environ.get('BMVC_HOST', '127.0.0.1'), port=8080, debug=debug)

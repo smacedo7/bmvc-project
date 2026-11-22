@@ -131,17 +131,20 @@ python realtime.py
 
 ## Projeto completo com Docker Compose
 
-Depois que o PR Docker estiver integrado à `main`, a aplicação e o banco podem ser iniciados juntos:
+Na versão completa da branch `main`, a aplicação e o banco podem ser iniciados juntos:
 
 ```bash
 git switch main
 git pull
+cp .env.example .env
 docker compose up --build -d
 docker compose run --rm web python -m app.manage create-user
 docker compose ps
 ```
 
 Abra `http://127.0.0.1:8080/login`. Os serviços `web` e `db` devem aparecer como `healthy`.
+
+O serviço web aplica as migrações do Alembic antes de iniciar. Para executar localmente fora do Compose na versão atual, rode `alembic upgrade head` depois de configurar `DATABASE_URL` e antes de criar o usuário.
 
 Comandos úteis:
 
