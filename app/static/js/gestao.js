@@ -18,3 +18,26 @@ if (busca && resultado && vazio) {
     vazio.hidden = encontrados !== 0;
   });
 }
+
+// Filtro local de tabelas e confirmação de exclusão nas páginas CRUD.
+const filtro = document.querySelector('[data-filtro]');
+if (filtro) {
+  const linhas = [...document.querySelectorAll('[data-linha]')];
+  const contagem = document.querySelector('[data-contagem]');
+  filtro.addEventListener('input', () => {
+    const termo = filtro.value.trim().toLocaleLowerCase('pt-BR');
+    let visiveis = 0;
+    linhas.forEach((linha) => {
+      const corresponde = linha.textContent.toLocaleLowerCase('pt-BR').includes(termo);
+      linha.hidden = !corresponde;
+      if (corresponde) visiveis += 1;
+    });
+    if (contagem) contagem.textContent = `${visiveis} registro(s) exibido(s)`;
+  });
+}
+
+document.querySelectorAll('[data-confirmar]').forEach((formulario) => {
+  formulario.addEventListener('submit', (evento) => {
+    if (!window.confirm(formulario.dataset.confirmar)) evento.preventDefault();
+  });
+});
