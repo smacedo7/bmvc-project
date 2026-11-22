@@ -94,6 +94,8 @@ python -m unittest discover -s tests -v
 
 Os testes **apagam e recriam tabelas** nesse banco de teste. Nunca use o banco da aplicação para `TEST_DATABASE_URL`. A suíte cobre CRUD, validação, ajuste e reversão de estoque, login, CSRF, API e broadcast WebSocket. Para conferir o JavaScript, `node --check app/static/js/gestao.js` verifica a sintaxe. A demonstração visual e a gravação dos vídeos continuam sendo etapas manuais.
 
+A configuração Docker foi verificada com a construção da imagem e a inicialização dos dois serviços. Os healthchecks de `web` e `db`, o login, `/api/resumo` e a conexão autenticada em `/ws` funcionaram no ambiente do Compose.
+
 ## Limites conhecidos
 
 - Uma venda contém um produto; impostos, notas fiscais, fornecedores e múltiplos usuários simultâneos não foram incluídos.
