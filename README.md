@@ -162,6 +162,7 @@ Os testes recriam as tabelas do banco indicado por `TEST_DATABASE_URL`. Não uti
 ## Documentação
 
 - [Manual completo de instalação e uso](docs/manual-de-uso.md)
+- [Guia de apresentação dos quatro níveis](docs/guia-apresentacao.md)
 - [UML do nível 1](docs/uml/nivel-1.md)
 - [UML do nível 2](docs/uml/nivel-2.md)
 - [UML do nível 3](docs/uml/nivel-3.md)
