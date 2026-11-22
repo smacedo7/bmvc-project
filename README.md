@@ -15,6 +15,8 @@ Repositório do trabalho: [smacedo7/bmvc-project](https://github.com/smacedo7/bm
 
 Os vídeos precisam ser gravados e publicados pelo estudante. Os roteiros em `docs/videos/` orientam a demonstração; este repositório não contém links de vídeos publicados.
 
+O [manual de instalação e uso](docs/manual-de-uso.md) explica como executar cada branch e demonstrar suas funcionalidades. Os diagramas UML estão disponíveis por nível: [Nível 1](docs/uml/nivel-1.md), [Nível 2](docs/uml/nivel-2.md), [Nível 3](docs/uml/nivel-3.md) e [Nível 4](docs/uml/nivel-4.md).
+
 ## Branches e histórico
 
 `main` é a versão completa e estável; `dev` é a integração. As branches `nivel/1-estatico`, `nivel/2-crud`, `nivel/3-login` e `nivel/4-websocket` registram a evolução. Cada `video/nivel-*` aponta para o commit exato planejado para a gravação correspondente. Para reproduzir uma etapa, execute `git switch video/nivel-1` (troque o número conforme o vídeo). Não grave um nível usando a branch de outro.
