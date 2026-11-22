@@ -21,12 +21,25 @@ Os vídeos precisam ser gravados e publicados pelo estudante. Os roteiros em `do
 
 ## Requisitos
 
-- Python 3.11 ou superior.
-- PostgreSQL 16 ou superior. `compose.yaml` oferece uma instância local na porta **5433**. Também é possível usar um PostgreSQL já instalado.
-- Bottle, SQLAlchemy, psycopg, Uvicorn e asgiref: instale com `requirements.txt`.
-- Porta 8080 disponível para a aplicação.
+- Para executar tudo em contêineres: Docker com Compose e porta **8080** disponível.
+- Para executar Python diretamente: Python 3.11 ou superior e PostgreSQL 16 ou superior. `compose.yaml` pode fornecer apenas o banco na porta **5433**.
+- As dependências Python estão em `requirements.txt`.
 
-## Executar BMVC IV (branch `main` ou `video/nivel-4`)
+## Executar tudo com Docker Compose (BMVC IV)
+
+Na branch `feat/docker-compose` (ou `main` após a integração do PR), na raiz do repositório:
+
+```bash
+docker compose up --build -d
+docker compose run --rm web python -m app.manage create-user
+docker compose ps
+```
+
+O primeiro comando constrói a imagem da aplicação, inicia PostgreSQL e espera o banco ficar saudável antes de iniciar o servidor. O segundo cria o primeiro usuário e pede a senha interativamente; rode-o apenas uma vez para cada usuário. Em seguida, abra [http://127.0.0.1:8080/login](http://127.0.0.1:8080/login). `docker compose logs -f web` mostra os logs e `docker compose down` para os contêineres **sem apagar** o volume do banco. O serviço `web` e o PostgreSQL estão publicados apenas em `127.0.0.1`.
+
+Para repetir a demonstração em um banco novo, crie outro nome de volume ou remova o volume conscientemente. `docker compose down -v` **apaga os dados locais** do banco. A senha em `compose.yaml` é somente para desenvolvimento na própria máquina.
+
+## Executar Python localmente (BMVC IV)
 
 Na raiz do repositório:
 
@@ -42,7 +55,7 @@ python realtime.py
 
 O comando `create-user` é necessário apenas para o primeiro usuário; ele pede nome e senha sem mostrar a senha digitada. Abra [http://127.0.0.1:8080/login](http://127.0.0.1:8080/login). Entre e navegue por Resumo, Clientes, Produtos e Vendas. Para demonstrar tempo real, abra o Resumo em uma aba e, em outra aba autenticada, cadastre ou altere uma venda. Os indicadores da primeira aba mudam sem F5.
 
-Para os **níveis 1 a 3**, use `python route.py` no lugar de `python realtime.py`. O nível 1 requer somente Bottle e dispensa PostgreSQL. Os níveis 2 e 3 requerem `DATABASE_URL`; o nível 3 também exige `create-user`. As tabelas são criadas na primeira execução. Se usar PostgreSQL próprio, adapte a URL de `.env.example`. As credenciais em `compose.yaml` servem apenas para desenvolvimento local. Não publique `.env` nem use a configuração de desenvolvimento como implantação pública.
+Para os **níveis 1 a 3**, faça checkout da respectiva branch `video/nivel-*` e use `python route.py` no lugar de `python realtime.py`. O nível 1 requer somente Bottle e dispensa PostgreSQL. Os níveis 2 e 3 requerem `DATABASE_URL`; o nível 3 também exige `create-user`. As tabelas são criadas na primeira execução. Se usar PostgreSQL próprio, adapte a URL de `.env.example`. A branch `video/nivel-4` é o registro congelado antes da configuração do serviço `web` no Compose; use a branch `main` após a integração para executar os dois contêineres juntos. Não publique `.env` nem use a configuração de desenvolvimento como implantação pública.
 
 ## Funcionalidades e regras
 
