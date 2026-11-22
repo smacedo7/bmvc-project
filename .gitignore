@@ -5,3 +5,4 @@ __pycache__/
 .DS_Store
 data/*.sqlite3
 data/*.sqlite3-journal
+.env
