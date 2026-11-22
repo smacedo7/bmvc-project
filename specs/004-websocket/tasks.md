@@ -1,8 +1,8 @@
 # Tarefas — Nível 4
 
 - [x] Definir comportamento em tempo real e plano técnico.
-- [ ] Criar hub WebSocket autenticado e entrada ASGI.
-- [ ] Publicar eventos após alterações e expor API de resumo.
-- [ ] Atualizar o resumo via JS sem recarregar.
-- [ ] Testar WebSocket, API, autenticação e regressão do CRUD.
-- [ ] Atualizar README e roteiro do vídeo 4.
+- [x] Criar hub WebSocket autenticado e entrada ASGI.
+- [x] Publicar eventos após alterações e expor API de resumo.
+- [x] Atualizar o resumo via JS sem recarregar.
+- [x] Testar WebSocket, API, autenticação e regressão do CRUD.
+- [x] Atualizar README e roteiro do vídeo 4.
