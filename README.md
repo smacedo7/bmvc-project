@@ -11,26 +11,29 @@ Projeto de orientação a objetos em Python baseado no [BMVC fornecido pelo prof
 | BMVC III | CRUD e controle de acesso com login e página restrita | até 10 min |
 | BMVC IV | CRUD, login e atualização em tempo real por WebSocket | até 15 min |
 
-Este checkout (`nivel/1-estatico`) contém o nível 1. As etapas futuras usarão SQLAlchemy e PostgreSQL. Veja `docs/videos/` para os roteiros.
+Este checkout (`nivel/2-crud`) contém o nível 2. O nível 1 permanece na branch `video/nivel-1`. Veja `docs/videos/` para os roteiros.
 
-## Executar o nível 1
+## Executar o nível 2
 
-Requer Python 3.11 ou superior. Na raiz do projeto:
+Requer Python 3.11 ou superior, Docker com Compose ou PostgreSQL local e a porta 8080 livre. Na raiz do projeto:
 
 ```bash
+docker compose up -d db
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+export DATABASE_URL="postgresql+psycopg://bmvc:bmvc_local@127.0.0.1:5433/bmvc"
 python route.py
 ```
 
-Abra `http://127.0.0.1:8080/`. Digite na busca dos módulos para conferir o JavaScript. A página original de ajuda do BMVC permanece em `/helper`.
+Abra `http://127.0.0.1:8080/`. A aplicação cria as tabelas na primeira execução. Use os links Clientes, Produtos e Vendas para demonstrar o CRUD. A página original do BMVC permanece em `/helper`. Para PostgreSQL já instalado, crie um banco próprio e ajuste `DATABASE_URL`; o formato está em `.env.example`. A configuração do Compose contém credenciais **somente para desenvolvimento local**. Não a use em implantação pública.
 
 ## Organização BMVC
 
 - `route.py`: servidor Bottle e rotas HTTP.
 - `app/controllers/application.py`: controlador da renderização.
-- `app/models/`: modelos de domínio nas próximas etapas.
+- `app/models/entities.py`: classes ORM e regras de domínio.
+- `app/models/repository.py`: consultas e transações SQLAlchemy.
 - `app/views/html/`: templates HTML/TPL.
 - `app/static/css/` e `app/static/js/`: apresentação e interação.
 - `specs/`: especificação, plano e tarefas de cada nível.
@@ -42,4 +45,15 @@ Abra `http://127.0.0.1:8080/`. Digite na busca dos módulos para conferir o Java
 
 ## Origem e limites
 
-A estrutura inicial (`route.py`, `app/`, `Dockerfile`) veio do repositório do professor. A aplicação, páginas e regras do ERP/CRM são próprias. O nível 1 apresenta módulos planejados; cadastros e indicadores reais começam nos níveis seguintes. O vídeo e seu envio ao YouTube são feitos pelo estudante.
+A estrutura inicial (`route.py`, `app/`, `Dockerfile`) veio do repositório do professor. A aplicação, páginas e regras do ERP/CRM são próprias. O nível 1 apresenta módulos planejados. O nível 2 usa dados reais no PostgreSQL. Cada venda contém um produto; não há autenticação nesta branch, portanto execute somente no computador local. O vídeo e seu envio ao YouTube são feitos pelo estudante.
+
+## Regras e testes do nível 2
+
+Clientes e produtos com vendas não podem ser excluídos. A venda guarda o preço no momento do registro. Criar, editar e excluir uma venda ajusta o estoque numa transação; uma tentativa inválida não altera os dados. Para rodar os testes, crie um banco **descartável** cujo nome termine em `_test` e informe sua URL:
+
+```bash
+export TEST_DATABASE_URL="postgresql+psycopg:///bmvc_test"
+python -m unittest discover -s tests -v
+```
+
+Os testes apagam e recriam as tabelas nesse banco de teste. Não use o banco da aplicação. O projeto ainda não inclui migrações de esquema; para mudanças futuras, será preciso adicionar um processo de migração.
