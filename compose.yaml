@@ -1,4 +1,21 @@
 services:
+  web:
+    build: .
+    init: true
+    environment:
+      DATABASE_URL: postgresql+psycopg://bmvc:bmvc_local@db:5432/bmvc
+      BMVC_HOST: 0.0.0.0
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/login', timeout=3).close()"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   db:
     image: postgres:16-alpine
     environment:
@@ -6,7 +23,7 @@ services:
       POSTGRES_USER: bmvc
       POSTGRES_PASSWORD: bmvc_local
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
     volumes:
       - bmvc_postgres:/var/lib/postgresql/data
     healthcheck:
